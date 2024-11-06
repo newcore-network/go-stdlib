@@ -3,10 +3,10 @@
 Welcome to the Styerr Standard Library, for re-use in other Styerr repositories and services
 
 ## Available libraries
-- configuration
+- [configuration](https://github.com/styerr-development/libs/blob/master/configuration/configuration.md)
 - [database](https://github.com/styerr-development/libs/blob/master/database/database.md)
-- logger
-- standardResponses
+- [logger](https://github.com/styerr-development/libs/blob/master/logger/logger.md)
+- [standardResponses](https://github.com/styerr-development/libs/blob/master/standardResponses/standardResponses.md)
 
 
 ## Simple configuration
