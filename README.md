@@ -1,40 +1,14 @@
-# Database: Styerr Standard Library
+# Styerr Standard Libraries
 
-A simple Go library for establishing a database connection using `gorm`, designed to standardize connection setups. Currently supports PostgreSQL and includes retry logic.
+Welcome to the Styerr Standard Library, for re-use in other Styerr repositories and services
+
+## Available libraries
+- configuration:
+- database:
+- logger:
+- standardResponses:
 
 
-## Installation
-
-```sh
-$   go get -u github.com/styerr-development/library-database
-```
-
-## Usage
-
-```go
-package main
-
-import (
-	"log"
-	"github.com/styerr-development/library-database"
-)
-
-func main() {
-	db, err := database.NewConnection()
-	if err != nil {
-		log.Fatalf("Database connection failed: %v", err)
-	}
-	
-	// `db` is ready for use
-}
-
-```
-
-## Configuration
+## Simple configuration
 
 Requires a .env file with database credentials. The configuration is handled through library-configuration. Check .env.example file for example
-
-## Notes
-
-- Supports retrying connection up to five times with a 3-second delay.
-- Planned support for additional databases in the future.
