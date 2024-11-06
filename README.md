@@ -18,12 +18,7 @@ Ensure you have the following in place before using the libraries:
 - .env file: Required for loading configuration details such as database credentials. Refer to the .env.example file in the repository for a template to get started.
 ### Installation
 Add the desired libraries to your project using Go modules:
-```sh
-$ go get github.com/styerr-development/libs/{library-name}
-```
-Replace {library-name} with the specific package you wish to use (e.g., configuration, database, logger, standardResponses).
 
-### or
 ```sh
 $ go get github.com/styerr-development/libs
 ```
