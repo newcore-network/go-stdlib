@@ -19,11 +19,15 @@ Ensure you have the following in place before using the libraries:
 ### Installation
 Add the desired libraries to your project using Go modules:
 ```sh
-go get github.com/styerr-development/libs/{library-name}
-or
-go get github.com/styerr-development/libs
+$ go get github.com/styerr-development/libs/{library-name}
 ```
 Replace {library-name} with the specific package you wish to use (e.g., configuration, database, logger, standardResponses).
+
+### or
+```sh
+$ go get github.com/styerr-development/libs
+```
+for all libraries
 
 
 
@@ -42,6 +46,8 @@ DB_PORT=5432
 DB_SSLMODE=disable
 JWT_KEY=myjwtsecretkey
 ```
+
+### Usage in your Go application:
 
 ```go
 import (
