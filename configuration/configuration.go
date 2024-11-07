@@ -16,7 +16,6 @@ type GeneralConfig struct {
 	Database string
 	Port     int
 	SSLMode  string
-	JWTKey   string
 }
 
 func GetFromEnvFile(file string) GeneralConfig {
@@ -39,11 +38,6 @@ func GetFromEnvFile(file string) GeneralConfig {
 		SSLMode = constants.DISABLE
 	}
 
-	jwtKey := os.Getenv(constants.JWTKEY)
-	if jwtKey == "" {
-		log.Fatal(constants.JWTKEY)
-	}
-
 	return GeneralConfig{
 		Host:     os.Getenv(constants.HOST),
 		User:     os.Getenv(constants.USER),
@@ -51,6 +45,5 @@ func GetFromEnvFile(file string) GeneralConfig {
 		Database: os.Getenv(constants.DATABASE),
 		Port:     port,
 		SSLMode:  SSLMode,
-		JWTKey:   jwtKey,
 	}
 }

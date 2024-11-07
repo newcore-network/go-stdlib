@@ -21,14 +21,12 @@ func (c Conn) GetDB() *gorm.DB {
 	return c.Gorm
 }
 
-func NewConnection(driver Connection, modelsToMigrate ...interface{}) (*gorm.DB, error) {
+func NewConnection(driver Connection, cfg configuration.GeneralConfig, modelsToMigrate ...interface{}) (*gorm.DB, error) {
 	var err error
 	var conn Conn
 
-	conf := configuration.GetFromEnvFile(".env")
-
 	for count := 0; count < 5; count++ {
-		conn, err = driver.Connect(conf)
+		conn, err = driver.Connect(cfg)
 		if err == nil {
 			break
 		}
