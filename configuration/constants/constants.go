@@ -5,25 +5,27 @@ package constants
 */
 
 // use for get the HOST from the .env file
-const HOST string = "HOST"
+const POSTGRES_HOST string = "POSTGRES_HOST"
 
 // use for get the USER from the .env file
-const USER string = "USER"
+const POSTGRES_USER string = "POSTGRES_USER"
 
 // use for get the PASSWORD from the .env file
-const PASSWORD string = "PASSWORD"
+const POSTGRES_PASSWORD string = "POSTGRES_PASSWORD"
 
 // use for get the DATABASE from the .env file
-const DATABASE string = "DATABASE"
+const POSTGRES_DATABASE string = "POSTGRES_DATABASE"
 
 // use for get the PORT from the .env file
-const PORT string = "PORT"
+const POSTGRES_PORT string = "POSTGRES_PORT"
 
 // use for get the SSLMODE from the .env file
-const SSLMODE string = "SSLMODE"
+const POSTGRES_SSLMODE string = "POSTGRES_SSLMODE"
 
-// use for get the JWTKEY from the .env file
-const JWTKEY string = "JWTKEY"
+// use for get the REDISHOST from the .env file
+const REDISHOST string = "REDIS_HOST"
+const REDISPORT string = "REDIS_PORT"
+const REDISDB string = "REDIS_DB"
 
 /*
 	status constants
