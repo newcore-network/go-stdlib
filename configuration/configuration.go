@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 	"github.com/styerr-development/libs/configuration/constants"
 )
@@ -32,7 +33,7 @@ func GetFromEnvFile(file string) GeneralConfig {
 
 	port, err := strconv.Atoi(os.Getenv(constants.POSTGRES_PORT))
 	if err != nil {
-		log.Println(constants.ERRPort)
+		color.New(color.BgRed, color.FgHiWhite).Println(constants.ERRPort)
 		return GeneralConfig{}
 	}
 

@@ -41,7 +41,7 @@ func NewConnection(driver Connection, cfg configuration.GeneralConfig) (*DBWrapp
 			break
 		}
 
-		color.New(color.FgRed).Printf("step : %d, error: %s\n", count+1, err)
+		color.New(color.FgRed).Printf("step: %d, error: %s\n", count+1, err)
 		time.Sleep(3 * time.Second)
 	}
 
@@ -49,7 +49,7 @@ func NewConnection(driver Connection, cfg configuration.GeneralConfig) (*DBWrapp
 		return nil, errors.New("connection failed after multiple attempts")
 	}
 
-	color.New(color.FgRed).Println("Database connection established", nil)
+	color.New(color.FgGreen).Println("Database connection established")
 
 	return &DBWrapper{Gorm: conn.Gorm}, nil
 }
@@ -57,7 +57,7 @@ func NewConnection(driver Connection, cfg configuration.GeneralConfig) (*DBWrapp
 // MigrateEnums migrate enums to the database. If the enum type doesn't exist, it creates it.
 func (db *DBWrapper) MigrateEnums(enumTypeName string, values []string) *DBWrapper {
 	if len(values) == 0 {
-		color.New(color.FgRed).Printf("values for enum '%s' are empty, skipping", enumTypeName)
+		color.New(color.FgRed).Printf("values for enum '%s' are empty, skipping\n", enumTypeName)
 		return db
 	}
 
@@ -73,10 +73,10 @@ func (db *DBWrapper) MigrateEnums(enumTypeName string, values []string) *DBWrapp
 
 	// Execute the SQL
 	if err := db.Gorm.Exec(sql).Error; err != nil {
-		color.New(color.FgRed).Printf("Error adding enum '%s': %v", enumTypeName, err)
+		color.New(color.FgRed).Printf("Error adding enum '%s': %v\n", enumTypeName, err)
 	}
 
-	color.New(color.FgHiGreen).Printf("Enum '%s' added", enumTypeName)
+	color.New(color.FgHiGreen).Printf("Enum '%s' added\n", enumTypeName)
 	return db
 }
 
@@ -91,14 +91,20 @@ func (db *DBWrapper) Migrate(models ...interface{}) *DBWrapper {
 		color.New(color.FgRed).Printf("Error migrating models: %v\n", err)
 	}
 
-	color.New(color.FgHiGreen).Println("Models migrated")
+	var modelNames []string
+	for _, model := range models {
+		modelNames = append(modelNames, fmt.Sprintf("%T", model))
+	}
+
+	color.New(color.FgHiGreen).Printf("Models migrated: %s\n", modelNames)
 	return db
+
 }
 
 func (db *DBWrapper) SetConnectionPool(maxOpen, maxIdle int, maxLifetime time.Duration) *DBWrapper {
 	sqlDB, err := db.Gorm.DB()
 	if err != nil {
-		color.New(color.FgRed).Printf("Error getting SQL connection: %v", err)
+		color.New(color.FgRed).Printf("Error getting SQL connection: %v\n", err)
 		os.Exit(1)
 	}
 	sqlDB.SetMaxOpenConns(maxOpen)
@@ -113,9 +119,9 @@ func (db *DBWrapper) SetConnectionPool(maxOpen, maxIdle int, maxLifetime time.Du
 func (db *DBWrapper) EnableExtension(extensionName string) *DBWrapper {
 	query := `CREATE EXTENSION IF NOT EXISTS "` + extensionName + `";`
 	if err := db.Gorm.Exec(query).Error; err != nil {
-		color.New(color.FgRed).Printf("Error enabling extension '%s': %v", extensionName, err)
+		color.New(color.FgRed).Printf("Error enabling extension '%s': %v\n", extensionName, err)
 	}
-	color.New(color.FgHiGreen).Printf("Extension '%s' enabled", extensionName)
+	color.New(color.FgHiGreen).Printf("Extension '%s' enabled\n", extensionName)
 	return db
 }
 
