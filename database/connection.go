@@ -61,7 +61,6 @@ func (db *DBWrapper) MigrateEnums(enumTypeName string, values []string) *DBWrapp
 		return db
 	}
 
-	// Prepare the SQL to create the enum type
 	valueList := "'" + strings.Join(values, "', '") + "'"
 	sql := fmt.Sprintf(`
 		DO $$ BEGIN
@@ -71,7 +70,6 @@ func (db *DBWrapper) MigrateEnums(enumTypeName string, values []string) *DBWrapp
 		END $$;
 	`, enumTypeName, enumTypeName, valueList)
 
-	// Execute the SQL
 	if err := db.Gorm.Exec(sql).Error; err != nil {
 		color.New(color.FgRed).Printf("Error adding enum '%s': %v\n", enumTypeName, err)
 	}
