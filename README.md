@@ -7,10 +7,10 @@ The Styerr Standard Library includes key packages for common functionalities suc
 
 ## Available libraries
 Explore the available libraries below, each with its own documentation and usage examples:
-- [configuration](https://github.com/styerr-development/libs/blob/master/configuration/configuration.md): Manage and load application configuration from environment files.
-- [database](https://github.com/styerr-development/libs/blob/master/database/database.md): Establish and manage database connections with support for PostgreSQL, MySQL, and MariaDB.
-- [logger](https://github.com/styerr-development/libs/blob/master/logger/logger.md): A structured logging package with support for JSON formatting and log file rotation.
-- [standardResponses](https://github.com/styerr-development/libs/blob/master/standardResponses/standardResponses.md): Simplifies the creation of standardized HTTP responses and error handling for APIs.
+- [configuration](https://github.com/newcore-network/libsblob/master/configuration/configuration.md): Manage and load application configuration from environment files.
+- [database](https://github.com/newcore-network/libsblob/master/database/database.md): Establish and manage database connections with support for PostgreSQL, MySQL, and MariaDB.
+- [logger](https://github.com/newcore-network/libsblob/master/logger/logger.md): A structured logging package with support for JSON formatting and log file rotation.
+- [standardResponses](https://github.com/newcore-network/libsblob/master/standardResponses/standardResponses.md): Simplifies the creation of standardized HTTP responses and error handling for APIs.
 
 ## Getting Started
 ### Prerequisites
@@ -20,7 +20,7 @@ Ensure you have the following in place before using the libraries:
 Add the desired libraries to your project using Go modules:
 
 ```sh
-$ go get github.com/styerr-development/libs
+$ go get github.com/newcore-network/libs/libs
 ```
 for all libraries
 
@@ -46,7 +46,7 @@ JWT_KEY=myjwtsecretkey
 
 ```go
 import (
-    "github.com/styerr-development/libs/configuration"
+    "github.com/newcore-network/libsconfiguration"
 )
 
 func main() {

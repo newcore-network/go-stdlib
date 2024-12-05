@@ -1,7 +1,7 @@
 
 # Database Library Documentation
 
-This document outlines the usage and setup of the `database` package within the `styerr-development/lib` repository. The library provides a unified way to establish database connections with support for different drivers like PostgreSQL, MySQL, and MariaDB.
+This document outlines the usage and setup of the `database` package within the `newcore.gg/lib` repository. The library provides a unified way to establish database connections with support for different drivers like PostgreSQL, MySQL, and MariaDB.
 
 ## Overview
 
@@ -19,7 +19,7 @@ The `database` package simplifies the process of connecting to various databases
 To use the `database` package in your project, import it as follows:
 
 ```go
-import "github.com/styerr-development/lib/database"
+import "github.com/newcore.gg/lib/database"
 ```
 
 ## Usage
@@ -49,7 +49,7 @@ package main
 
 import (
     "log"
-    "github.com/styerr-development/lib/database"
+    "github.com/newcore-network/libs"
 )
 
 func main() {

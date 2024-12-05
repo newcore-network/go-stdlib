@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/styerr-development/libs/configuration"
+	"github.com/newcore-network/libs/configuration"
 	"gorm.io/gorm"
 )
 

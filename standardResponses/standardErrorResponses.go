@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v3"
-	"github.com/styerr-development/libs/logger"
+	"github.com/newcore-network/libs/logger"
 )
 
 type StandardError struct {

@@ -7,7 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
-	"github.com/styerr-development/libs/configuration/constants"
+	"github.com/newcore-network/libs/configuration/constants"
 )
 
 type GeneralConfig struct {

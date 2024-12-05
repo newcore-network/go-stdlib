@@ -57,7 +57,7 @@ package main
 
 import (
     "log"
-    "github.com/styerr-development/libs/configuration"
+    "github.com/newcore-network/libsconfiguration"
 )
 
 func main() {

@@ -125,4 +125,4 @@ Each response method logs relevant context automatically using the `logger` pack
 The `standardResponses` package relies on:
 - `github.com/gofiber/fiber/v3`: The Fiber web framework.
 - `github.com/go-playground/validator`: For handling validation errors.
-- `github.com/styerr-development/libs/logger`: For integrated logging.
+- `github.com/newcore-network/libslogger`: For integrated logging.

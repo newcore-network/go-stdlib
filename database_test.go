@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/styerr-development/libs/configuration"
-	"github.com/styerr-development/libs/database"
-	"github.com/styerr-development/libs/database/drivers"
+	"github.com/newcore-network/libs/configuration"
+	"github.com/newcore-network/libs/database"
+	"github.com/newcore-network/libs/database/drivers"
 )
 
 func TestConnectionPassed(t *testing.T) {

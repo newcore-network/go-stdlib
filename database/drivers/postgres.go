@@ -3,8 +3,8 @@ package drivers
 import (
 	"fmt"
 
-	"github.com/styerr-development/libs/configuration"
-	"github.com/styerr-development/libs/database"
+	"github.com/newcore-network/libs/configuration"
+	"github.com/newcore-network/libs/database"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
