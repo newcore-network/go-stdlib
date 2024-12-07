@@ -1,9 +1,9 @@
-# Styerr Standard Libraries
+# Newcore Standard Libraries
 
-Welcome to the Styerr Standard Library, a comprehensive suite of reusable components designed for seamless integration across all Styerr repositories and services. These libraries offer robust functionality, streamline development, and promote consistency throughout projects.
+Welcome to the Newcore Standard Library, a comprehensive suite of reusable components designed for seamless integration across all Newcore repositories and services. These libraries offer robust functionality, streamline development, and promote consistency throughout projects.
 
 ## Overview
-The Styerr Standard Library includes key packages for common functionalities such as configuration management, database connections, structured logging, and standardized HTTP responses. Each package is designed to be modular and easy to integrate into different projects.
+The Newcore Standard Library includes key packages for common functionalities such as configuration management, database connections, structured logging, and standardized HTTP responses. Each package is designed to be modular and easy to integrate into different projects.
 
 ## Available libraries
 Explore the available libraries below, each with its own documentation and usage examples:
