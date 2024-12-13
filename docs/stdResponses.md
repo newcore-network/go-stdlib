@@ -1,11 +1,11 @@
 
 # Standard Responses Package Documentation
 
-This document outlines the `standardResponses` package, which provides standardized methods for generating consistent API responses and error handling in applications using the Fiber web framework.
+This document outlines the `response` package, which provides standardized methods for generating consistent API responses and error handling in applications using the Fiber web framework.
 
 ## Overview
 
-The `standardResponses` package ensures uniformity in API responses by offering a set of pre-defined response and error handling functions. These functions help streamline logging and response formatting, while also including relevant context about the route, method, and data involved.
+The `response` package ensures uniformity in API responses by offering a set of pre-defined response and error handling functions. These functions help streamline logging and response formatting, while also including relevant context about the route, method, and data involved.
 
 ## Features
 

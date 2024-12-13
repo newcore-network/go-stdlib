@@ -1,11 +1,10 @@
-package standardResponses
+package stdlib
 
 import (
 	"fmt"
 
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v3"
-	"github.com/newcore-network/libs/logger"
 )
 
 type StandardError struct {
@@ -22,7 +21,7 @@ func ErrInternalServer(c fiber.Ctx, err error, data interface{}, layer string) e
 	response := StandardError{
 		ErrorMessage: "INTERNAL SERVER ERROR",
 	}
-	logger.CaptureError(err, fmt.Sprintf("(%s) Internal server error", layer), map[string]interface{}{
+	CaptureError(err, fmt.Sprintf("(%s) Internal server error", layer), map[string]interface{}{
 		"data":   data,
 		"route":  c.Path(),
 		"method": c.Method(),
@@ -35,7 +34,7 @@ func ErrNotFound(c fiber.Ctx, layer string) error {
 	err := StandardError{
 		ErrorMessage: "NOT FOUND",
 	}
-	logger.Warn(fmt.Sprintf("(%s) Not found", layer), map[string]interface{}{
+	Warn(fmt.Sprintf("(%s) Not found", layer), map[string]interface{}{
 		"route":  c.Path(),
 		"method": c.Method(),
 	})
@@ -47,7 +46,7 @@ func ErrBadRequest(c fiber.Ctx, body string, err error, layer string) error {
 	response := StandardError{
 		ErrorMessage: "BAD REQUEST",
 	}
-	logger.CaptureError(err, fmt.Sprintf("(%s) failed to parse | bad request!", layer), map[string]interface{}{
+	CaptureError(err, fmt.Sprintf("(%s) failed to parse | bad request!", layer), map[string]interface{}{
 		"error":  err.Error(),
 		"route":  c.Path(),
 		"method": c.Method(),
@@ -61,7 +60,7 @@ func ErrBadRequestParse(c fiber.Ctx, err error, request interface{}, layer strin
 	response := StandardError{
 		ErrorMessage: "BAD REQUEST",
 	}
-	logger.CaptureError(err, fmt.Sprintf("(%s) Failed to parse %v", layer, request), map[string]interface{}{
+	CaptureError(err, fmt.Sprintf("(%s) Failed to parse %v", layer, request), map[string]interface{}{
 		"request-tried": request,
 		"route":         c.Path(),
 		"method":        c.Method(),
@@ -74,7 +73,7 @@ func ErrConflict(c fiber.Ctx, err error, request interface{}, layer string) erro
 	response := StandardError{
 		ErrorMessage: "CONFLICT",
 	}
-	logger.Warn(fmt.Sprintf("(%s) Conflict! error: %v", layer, err), map[string]interface{}{
+	Warn(fmt.Sprintf("(%s) Conflict! error: %v", layer, err), map[string]interface{}{
 		"request-tried": request,
 		"route":         c.Path(),
 		"method":        c.Method(),
@@ -87,7 +86,7 @@ func ErrUnauthorized(c fiber.Ctx, data interface{}, err error, layer string) err
 	response := StandardError{
 		ErrorMessage: "UNAUTHORIZED",
 	}
-	logger.Warn(fmt.Sprintf("(%s) Unauthorized!, error: %v", layer, err), map[string]interface{}{
+	Warn(fmt.Sprintf("(%s) Unauthorized!, error: %v", layer, err), map[string]interface{}{
 		"data":   data,
 		"error":  err.Error(),
 		"route":  c.Path(),
@@ -101,7 +100,7 @@ func ErrExpiredAccessToken(c fiber.Ctx, layer string) error {
 	err := StandardError{
 		ErrorMessage: "AccessToken expired",
 	}
-	logger.Warn(fmt.Sprintf("(%s) Unauthorized | AccessToken expired", layer), map[string]interface{}{
+	Warn(fmt.Sprintf("(%s) Unauthorized | AccessToken expired", layer), map[string]interface{}{
 		"route":  c.Path(),
 		"method": c.Method(),
 	})
@@ -113,7 +112,7 @@ func ErrInvalidToken(c fiber.Ctx, layer string) error {
 	err := StandardError{
 		ErrorMessage: "Invalid token",
 	}
-	logger.Warn(fmt.Sprintf("(%s) Unauthorized | Invalid token", layer), map[string]interface{}{
+	Warn(fmt.Sprintf("(%s) Unauthorized | Invalid token", layer), map[string]interface{}{
 		"route":  c.Path(),
 		"method": c.Method(),
 	})
@@ -125,7 +124,7 @@ func ErrTokenIsBlacklisted(c fiber.Ctx, layer string) error {
 	response := StandardError{
 		ErrorMessage: "Token is blacklisted",
 	}
-	logger.Warn(fmt.Sprintf("(%s) Unauthorized | Token is blacklisted", layer), map[string]interface{}{
+	Warn(fmt.Sprintf("(%s) Unauthorized | Token is blacklisted", layer), map[string]interface{}{
 		"route":  c.Path(),
 		"method": c.Method(),
 	})
@@ -137,7 +136,7 @@ func ErrForbidden(c fiber.Ctx, layer string) error {
 	err := StandardError{
 		ErrorMessage: "FORBIDDEN",
 	}
-	logger.Warn(fmt.Sprintf("(%s) Forbidden | insufficient permissions", layer), map[string]interface{}{
+	Warn(fmt.Sprintf("(%s) Forbidden | insufficient permissions", layer), map[string]interface{}{
 		"route":  c.Path(),
 		"method": c.Method(),
 	})
@@ -149,7 +148,7 @@ func ErrUnauthorizedHeader(c fiber.Ctx, layer string) error {
 	err := StandardError{
 		ErrorMessage: "Authorization Header is missing",
 	}
-	logger.Warn(fmt.Sprintf("(%s) Unauthorized | Authorization Header is missing", layer), map[string]interface{}{
+	Warn(fmt.Sprintf("(%s) Unauthorized | Authorization Header is missing", layer), map[string]interface{}{
 		"route":  c.Path(),
 		"method": c.Method(),
 	})
@@ -161,7 +160,7 @@ func ErrUnauthorizedInvalidHeader(c fiber.Ctx, layer string) error {
 	err := StandardError{
 		ErrorMessage: "Invalid authorization header format",
 	}
-	logger.Warn(fmt.Sprintf("(%s) Unauthorized | Invalid authorization header format", layer), map[string]interface{}{
+	Warn(fmt.Sprintf("(%s) Unauthorized | Invalid authorization header format", layer), map[string]interface{}{
 		"route":  c.Path(),
 		"method": c.Method(),
 	})
@@ -173,7 +172,7 @@ func ErrUUIDParse(c fiber.Ctx, id string) error {
 	response := StandardError{
 		ErrorMessage: "ID provided is not a valid UUID type",
 	}
-	logger.Error(response.ErrorMessage, map[string]interface{}{
+	Error(response.ErrorMessage, map[string]interface{}{
 		"provided-id": id,
 		"route":       c.Path(),
 		"method":      c.Method(),
@@ -186,7 +185,7 @@ func ErrEmptyParametersOrArguments(c fiber.Ctx) error {
 	response := StandardError{
 		ErrorMessage: "One of the parameters or arguments is empty",
 	}
-	logger.Error(response.ErrorMessage, map[string]interface{}{
+	Error(response.ErrorMessage, map[string]interface{}{
 		"route":  c.Path(),
 		"method": c.Method(),
 	})

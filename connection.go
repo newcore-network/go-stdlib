@@ -1,36 +1,44 @@
-package database
+package stdlib
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/newcore-network/libs/configuration"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
+// Connection defines an interface for database drivers to implement.
+// It provides the method to establish a database connection using a given configuration.
 type Connection interface {
-	Connect(cfg configuration.GeneralConfig) (Conn, error)
+	Connect(cfg StdLibConfiguration) (Conn, error)
 }
 
+// Conn represents a database connection encapsulated with Gorm.
 type Conn struct {
 	Gorm *gorm.DB
 }
 
-// DBWrapper wraps the Gorm DB connection and provides additional methods for managing enums.
+// DBWrapper is a wrapper around the Gorm database connection.
+// It provides additional methods for managing the database, such as enum migrations and connection pool configuration.
 type DBWrapper struct {
 	Gorm *gorm.DB
 }
 
+// GetDB returns the underlying Gorm database connection.
 func (c Conn) GetDB() *gorm.DB {
 	return c.Gorm
 }
 
-// NewConnection establishes a connection to the database with retry logic and wraps it in a DBWrapper.
-func NewConnection(driver Connection, cfg configuration.GeneralConfig) (*DBWrapper, error) {
+// NewConnection establishes a database connection with retry logic and wraps it in a DBWrapper.
+// If the connection fails after multiple attempts (3), it returns an error.
+func NewConnection(driver Connection, cfg StdLibConfiguration) (*DBWrapper, error) {
 	var err error
 	var conn Conn
 
@@ -54,10 +62,28 @@ func NewConnection(driver Connection, cfg configuration.GeneralConfig) (*DBWrapp
 	return &DBWrapper{Gorm: conn.Gorm}, nil
 }
 
-// MigrateEnums migrate enums to the database. If the enum type doesn't exist, it creates it.
+// NewRedisConnection creates a new Redis client and pings the server to ensure connectivity.
+// If the connection fails, it panics.
+func NewRedisConnection(ctx context.Context, cfg StdLibConfiguration) *redis.Client {
+	client := redis.NewClient(&redis.Options{
+		Addr:     cfg.RedisHost + ":" + strconv.Itoa(cfg.RedisPort),
+		Password: cfg.Password,
+		DB:       cfg.RedisDB,
+	})
+
+	_, err := client.Ping(ctx).Result()
+	if err != nil {
+		panic("cannot connect to redis")
+	}
+
+	return client
+}
+
+// MigrateEnums adds or updates an ENUM type in the PostgreSQL database.
+// If the ENUM type does not exist, it creates it with the provided values.
 func (db *DBWrapper) MigrateEnums(enumTypeName string, values []string) *DBWrapper {
 	if len(values) == 0 {
-		color.New(color.FgRed).Printf("values for enum '%s' are empty, skipping\n", enumTypeName)
+		color.New(color.FgRed).Printf("values for enum '%s' are empty, skipping...\n", enumTypeName)
 		return db
 	}
 
@@ -78,7 +104,8 @@ func (db *DBWrapper) MigrateEnums(enumTypeName string, values []string) *DBWrapp
 	return db
 }
 
-// Migrate adds the specified models to the database.
+// Migrate applies database migrations for the specified models.
+// It automatically migrates the database schema based on the provided models.
 func (db *DBWrapper) Migrate(models ...interface{}) *DBWrapper {
 	if len(models) == 0 {
 		color.New(color.FgYellow).Println("No models provided for migration, skipping...")
@@ -99,6 +126,8 @@ func (db *DBWrapper) Migrate(models ...interface{}) *DBWrapper {
 
 }
 
+// SetConnectionPool configures the connection pool settings for the database.
+// It allows setting the maximum number of open connections, idle connections, and connection lifetime.
 func (db *DBWrapper) SetConnectionPool(maxOpen, maxIdle int, maxLifetime time.Duration) *DBWrapper {
 	sqlDB, err := db.Gorm.DB()
 	if err != nil {
@@ -114,6 +143,7 @@ func (db *DBWrapper) SetConnectionPool(maxOpen, maxIdle int, maxLifetime time.Du
 }
 
 // EnableExtension ensures a PostgreSQL extension is enabled in the database.
+// If the extension does not exist, it creates it.
 func (db *DBWrapper) EnableExtension(extensionName string) *DBWrapper {
 	query := `CREATE EXTENSION IF NOT EXISTS "` + extensionName + `";`
 	if err := db.Gorm.Exec(query).Error; err != nil {
@@ -123,6 +153,7 @@ func (db *DBWrapper) EnableExtension(extensionName string) *DBWrapper {
 	return db
 }
 
+// EnableUUIDExtension is a helper method to enable the 'pgcrypto' extension for UUID generation.
 func (db *DBWrapper) EnableUUIDExtension() *DBWrapper {
 	db.EnableExtension("pgcrypto")
 	return db

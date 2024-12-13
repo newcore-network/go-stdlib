@@ -1,8 +1,7 @@
-package standardResponses
+package stdlib
 
 import (
 	"github.com/gofiber/fiber/v3"
-	"github.com/newcore-network/libs/logger"
 )
 
 type StandardResponse struct {
@@ -15,7 +14,7 @@ func Standard(c fiber.Ctx, message string, data interface{}) error {
 		Message: message,
 		Data:    data,
 	}
-	logger.Info(message, map[string]interface{}{
+	Info(message, map[string]interface{}{
 		"response": data,
 		"message":  message,
 		"route":    c.Path(),
