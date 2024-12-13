@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 )
 
@@ -22,54 +21,50 @@ type StdLibConfiguration struct {
 	RedisDB   int
 }
 
-// LoadCfg loads the configuration from the specified file.
-// If the file is not provided, it defaults to ".env".
-// It return a GeneralConfig instance.
-func LoadCfg(file string) StdLibConfiguration {
-	var err error
-	if file == "" {
-		file = ".env"
+// LoadCfg loads the configuration from the specified file or defaults to ".env".
+// It returns a StdLibConfiguration instance.
+// If an error occurs during loading, it logs the error and continues with the environment variables already set.
+func LoadCfg(files ...string) StdLibConfiguration {
+	file := ".env"
+	if len(files) > 0 && files[0] != "" {
+		file = files[0]
 	}
 
-	err = godotenv.Load(file)
+	if _, err := os.Stat(file); err == nil {
+		if loadErr := godotenv.Overload(file); loadErr != nil {
+			log.Panicf("Error loading environment file: %v", loadErr)
+		}
+	} else if len(files) > 0 {
+		log.Panicf("Specified environment file '%s' does not exist", file)
+	}
+
+	port, err := strconv.Atoi(os.Getenv("POSTGRES_PORT"))
 	if err != nil {
-		log.Fatalf("%s -> %v", ERRLoading, err)
+		log.Panicf("Error parsing POSTGRES_PORT: %v", err)
 	}
-
-	port, err := strconv.Atoi(os.Getenv(POSTGRES_PORT))
+	redisPort, err := strconv.Atoi(os.Getenv("REDISPORT"))
 	if err != nil {
-		color.New(color.BgRed, color.FgHiWhite).Println(ERRPort)
-		return StdLibConfiguration{}
+		log.Panicf("Error parsing REDISPORT: %v", err)
 	}
-
-	redisPort, err := strconv.Atoi(os.Getenv(REDISPORT))
+	redisDB, err := strconv.Atoi(os.Getenv("REDISDB"))
 	if err != nil {
-		log.Println(ERRPort)
-		return StdLibConfiguration{}
+		log.Panicf("Error parsing REDISDB: %v", err)
 	}
 
-	redisDB, err := strconv.Atoi(os.Getenv(REDISDB))
-	if err != nil {
-		log.Println(ERRPort)
-		return StdLibConfiguration{}
-	}
-
-	var SSLMode string
-	if os.Getenv(POSTGRES_SSLMODE) == ENABLE {
-		SSLMode = ENABLE
-	} else {
-		SSLMode = DISABLE
+	SSLMode := "disable"
+	if os.Getenv("POSTGRES_SSLMODE") == "enable" {
+		SSLMode = "enable"
 	}
 
 	return StdLibConfiguration{
-		Host:     os.Getenv(POSTGRES_HOST),
-		User:     os.Getenv(POSTGRES_USER),
-		Password: os.Getenv(POSTGRES_PASSWORD),
-		Database: os.Getenv(POSTGRES_DATABASE),
+		Host:     os.Getenv("POSTGRES_HOST"),
+		User:     os.Getenv("POSTGRES_USER"),
+		Password: os.Getenv("POSTGRES_PASSWORD"),
+		Database: os.Getenv("POSTGRES_DATABASE"),
 		Port:     port,
 		SSLMode:  SSLMode,
 
-		RedisHost: os.Getenv(REDISHOST),
+		RedisHost: os.Getenv("REDISHOST"),
 		RedisPort: redisPort,
 		RedisDB:   redisDB,
 	}

@@ -2,6 +2,8 @@
 
 Welcome to the Newcore Standard Library, a comprehensive suite of reusable components designed for seamless integration across all Newcore repositories and services. These libraries offer robust functionality, streamline development, and promote consistency throughout projects.
 
+Test Coverage: 11.3%
+
 ## Overview
 The Newcore Standard Library includes key packages for common functionalities such as configuration management, database connections, structured logging, and standardized HTTP responses. Each package is designed to be modular and easy to integrate into different projects.
 
