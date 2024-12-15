@@ -58,13 +58,13 @@ type AbstractRepository[T Identifiable[K], K ID] interface {
 	GetType() string
 }
 
-type AbstractRepositoryImpl[T Identifiable[K], K ID] struct {
+type abstractRepositoryImpl[T Identifiable[K], K ID] struct {
 	gorm *gorm.DB
 	self AbstractRepository[T, K]
 }
 
 // FindAll implements AbstractRepository.
-func (repo *AbstractRepositoryImpl[T, K]) FindAll() ([]T, error) {
+func (repo *abstractRepositoryImpl[T, K]) FindAll() ([]T, error) {
 	var entities []T
 
 	if repo.self == nil {
@@ -85,7 +85,7 @@ func (repo *AbstractRepositoryImpl[T, K]) FindAll() ([]T, error) {
 }
 
 // FindByID implements AbstractRepository.
-func (repo *AbstractRepositoryImpl[T, K]) FindByID(id K) (T, error) {
+func (repo *abstractRepositoryImpl[T, K]) FindByID(id K) (T, error) {
 	var entity T
 
 	if repo.self == nil {
@@ -102,7 +102,7 @@ func (repo *AbstractRepositoryImpl[T, K]) FindByID(id K) (T, error) {
 }
 
 // FindByKey implements AbstractRepository.
-func (repo *AbstractRepositoryImpl[T, K]) FindByKey(key, value string) (T, error) {
+func (repo *abstractRepositoryImpl[T, K]) FindByKey(key, value string) (T, error) {
 	var entity T
 
 	if repo.self == nil {
@@ -119,7 +119,7 @@ func (repo *AbstractRepositoryImpl[T, K]) FindByKey(key, value string) (T, error
 	return entity, nil
 }
 
-func (repo *AbstractRepositoryImpl[T, K]) Create(tx *gorm.DB, newEntity T) (T, error) {
+func (repo *abstractRepositoryImpl[T, K]) Create(tx *gorm.DB, newEntity T) (T, error) {
 	if err := repo.transCheck(tx).Create(&newEntity).Error; err != nil {
 		var zeroValue T
 		return zeroValue, err
@@ -129,7 +129,7 @@ func (repo *AbstractRepositoryImpl[T, K]) Create(tx *gorm.DB, newEntity T) (T, e
 }
 
 // Update implements AbstractRepository.
-func (repo *AbstractRepositoryImpl[T, K]) Update(tx *gorm.DB, id K, newEntity T) error {
+func (repo *abstractRepositoryImpl[T, K]) Update(tx *gorm.DB, id K, newEntity T) error {
 	entity := createInstance[T]()
 
 	if err := repo.transCheck(tx).
@@ -144,7 +144,7 @@ func (repo *AbstractRepositoryImpl[T, K]) Update(tx *gorm.DB, id K, newEntity T)
 }
 
 // Delete implements AbstractRepository.
-func (repo *AbstractRepositoryImpl[T, K]) Delete(tx *gorm.DB, id K) error {
+func (repo *abstractRepositoryImpl[T, K]) Delete(tx *gorm.DB, id K) error {
 	entity := createInstance[T]()
 
 	if err := repo.transCheck(tx).
@@ -157,7 +157,7 @@ func (repo *AbstractRepositoryImpl[T, K]) Delete(tx *gorm.DB, id K) error {
 }
 
 // Restore implements AbstractRepository.
-func (repo *AbstractRepositoryImpl[T, K]) Restore(tx *gorm.DB, id K) error {
+func (repo *abstractRepositoryImpl[T, K]) Restore(tx *gorm.DB, id K) error {
 	entity := createInstance[T]()
 
 	result := repo.transCheck(tx).
@@ -172,11 +172,11 @@ func (repo *AbstractRepositoryImpl[T, K]) Restore(tx *gorm.DB, id K) error {
 	return nil
 }
 
-func (repo *AbstractRepositoryImpl[T, K]) GetPreloads() []string {
+func (repo *abstractRepositoryImpl[T, K]) GetPreloads() []string {
 	return nil // Default: no preloads
 }
 
-func (repo *AbstractRepositoryImpl[T, K]) GetType() string {
+func (repo *abstractRepositoryImpl[T, K]) GetType() string {
 	tType := reflect.TypeOf(new(T)).Elem().String()
 	kType := reflect.TypeOf(new(K)).Elem().String()
 
@@ -199,7 +199,7 @@ func applyPreloads(db *gorm.DB, preloads []string) *gorm.DB {
 
 // Helper function to check if it is within a transactional context to use the
 // transaction or use the current repository
-func (repo *AbstractRepositoryImpl[T, K]) transCheck(tx *gorm.DB) *gorm.DB {
+func (repo *abstractRepositoryImpl[T, K]) transCheck(tx *gorm.DB) *gorm.DB {
 	db := tx
 	if db == nil {
 		db = repo.gorm
@@ -213,7 +213,7 @@ func (repo *AbstractRepositoryImpl[T, K]) transCheck(tx *gorm.DB) *gorm.DB {
 //
 // Deprecated: use CreateRepository instead
 func NewAbstractRepository[T Identifiable[K], K ID](gorm *gorm.DB, self AbstractRepository[T, K]) AbstractRepository[T, K] {
-	return &AbstractRepositoryImpl[T, K]{gorm: gorm, self: self}
+	return &abstractRepositoryImpl[T, K]{gorm: gorm, self: self}
 }
 
 // CreateRepository creates a new instance of AbstractRepositoryImpl with the provided gormDB and self.
@@ -229,8 +229,8 @@ func NewAbstractRepository[T Identifiable[K], K ID](gorm *gorm.DB, self Abstract
 //			AbstractRepository: stdlib.CreateRepository(gormDB, AccountRepository{}),
 //		}
 //	}
-func CreateRepository[T Identifiable[K], K ID](gormDB *gorm.DB, self AbstractRepository[T, K]) *AbstractRepositoryImpl[T, K] {
-	repo := &AbstractRepositoryImpl[T, K]{
+func CreateRepository[T Identifiable[K], K ID](gormDB *gorm.DB, self AbstractRepository[T, K]) *abstractRepositoryImpl[T, K] {
+	repo := &abstractRepositoryImpl[T, K]{
 		gorm: gormDB,
 		self: self,
 	}

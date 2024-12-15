@@ -11,6 +11,7 @@ import (
 
 var logger = logrus.New()
 
+// InitLogger initializes the logger with a JSON formatter, a lumberjack writer, and the Info level.
 func InitLogger() {
 	logger.SetFormatter(&logrus.JSONFormatter{})
 
