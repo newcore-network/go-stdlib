@@ -29,9 +29,17 @@ type AbstractRepository[T Identifiable[K], K ID] interface {
 	// FindByID retrieves a single entity of type T by its ID.
 	FindByID(id K) (T, error)
 
-	// FindByKey retrieves a single entity of type T by a specific field (key).
+	// FirstByKey retrieves a single entity of type T by a specific field (key),thats mean
+	// only the first Match!
 	// The `key` parameter specifies the field to search, and `value` is the value to match.
-	FindByKey(key, value string) (T, error)
+	//
+	// if you want to find all use:
+	//	 FindAllByKey(key, value)
+	FirstByKey(key, value string) (T, error)
+
+	// FindAllByKey retrieves all entities of type T by a specific field (key)
+	// The `key` parameter specifies the field to search, and `value` is the value to match.
+	FindAllByKey(key, value string) ([]T, error)
 
 	// Create inserts a new entity of type T into the database and returns its ID.
 	// The operation can optionally be executed within a transaction.
@@ -101,8 +109,8 @@ func (repo *abstractRepositoryImpl[T, K]) FindByID(id K) (T, error) {
 	return entity, nil
 }
 
-// FindByKey implements AbstractRepository.
-func (repo *abstractRepositoryImpl[T, K]) FindByKey(key, value string) (T, error) {
+// FirstByKey implements AbstractRepository.
+func (repo *abstractRepositoryImpl[T, K]) FirstByKey(key, value string) (T, error) {
 	var entity T
 
 	if repo.self == nil {
@@ -117,6 +125,24 @@ func (repo *abstractRepositoryImpl[T, K]) FindByKey(key, value string) (T, error
 		return entity, err
 	}
 	return entity, nil
+}
+
+// FindByKey implements AbstractRepository.
+func (repo *abstractRepositoryImpl[T, K]) FindAllByKey(key, value string) ([]T, error) {
+	var entities []T
+
+	if repo.self == nil {
+		return entities, errors.New("self reference is nil in repository")
+	}
+
+	preloads := repo.self.GetPreloads()
+	db := applyPreloads(repo.gorm, preloads)
+	query := fmt.Sprintf("%s = ?", key)
+
+	if err := db.Where(query, value).Find(&entities).Error; err != nil {
+		return entities, err
+	}
+	return entities, nil
 }
 
 func (repo *abstractRepositoryImpl[T, K]) Create(tx *gorm.DB, newEntity T) (T, error) {
