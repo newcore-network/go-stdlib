@@ -42,11 +42,11 @@ func LoadCfg(files ...string) StdLibConfiguration {
 	if err != nil {
 		log.Panicf("Error parsing POSTGRES_PORT: %v", err)
 	}
-	redisPort, err := strconv.Atoi(os.Getenv("REDISPORT"))
+	redisPort, err := strconv.Atoi(os.Getenv("REDIS_PORT"))
 	if err != nil {
 		log.Panicf("Error parsing REDISPORT: %v", err)
 	}
-	redisDB, err := strconv.Atoi(os.Getenv("REDISDB"))
+	redisDB, err := strconv.Atoi(os.Getenv("REDIS_DB"))
 	if err != nil {
 		log.Panicf("Error parsing REDISDB: %v", err)
 	}
@@ -64,7 +64,7 @@ func LoadCfg(files ...string) StdLibConfiguration {
 		Port:     port,
 		SSLMode:  SSLMode,
 
-		RedisHost: os.Getenv("REDISHOST"),
+		RedisHost: os.Getenv("REDIS_HOST"),
 		RedisPort: redisPort,
 		RedisDB:   redisDB,
 	}
