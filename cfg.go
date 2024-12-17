@@ -24,17 +24,17 @@ type StdLibConfiguration struct {
 // LoadCfg loads the configuration from the specified file or defaults to ".env".
 // It returns a StdLibConfiguration instance.
 // If an error occurs during loading, it logs the error and continues with the environment variables already set.
-func LoadCfg(files ...string) StdLibConfiguration {
-	file := ".env"
-	if len(files) > 0 && files[0] != "" {
-		file = files[0]
+func LoadCfg(file ...string) StdLibConfiguration {
+	defaultFile := ".env"
+	if len(file) > 0 && file[0] != "" {
+		defaultFile = file[0]
 	}
 
-	if _, err := os.Stat(file); err == nil {
-		if loadErr := godotenv.Overload(file); loadErr != nil {
+	if _, err := os.Stat(defaultFile); err == nil {
+		if loadErr := godotenv.Overload(defaultFile); loadErr != nil {
 			log.Panicf("Error loading environment file: %v", loadErr)
 		}
-	} else if len(files) > 0 {
+	} else if len(defaultFile) > 0 {
 		log.Panicf("Specified environment file '%s' does not exist", file)
 	}
 
