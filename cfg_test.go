@@ -27,9 +27,9 @@ func teardownEnv() {
 	_ = os.Unsetenv("POSTGRES_DATABASE")
 	_ = os.Unsetenv("POSTGRES_PORT")
 	_ = os.Unsetenv("POSTGRES_SSLMODE")
-	_ = os.Unsetenv("REDISHOST")
-	_ = os.Unsetenv("REDISPORT")
-	_ = os.Unsetenv("REDISDB")
+	_ = os.Unsetenv("REDIS_HOST")
+	_ = os.Unsetenv("REDIS_PORT")
+	_ = os.Unsetenv("REDIS_DB")
 }
 
 func TestLoadCfg_ValidEnv(t *testing.T) {
