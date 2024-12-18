@@ -165,10 +165,6 @@ func (repo *abstractCacheRepositoryImpl[V]) HGet(key string, field string) (*any
 }
 
 func (repo *abstractCacheRepositoryImpl[V]) HScan(key string, pattern string, count int64) (map[string]string, error) {
-	if repo.self != nil && repo.self != repo {
-		return repo.self.HScan(key, pattern, count)
-	}
-
 	var cursor uint64
 	result := make(map[string]string)
 
