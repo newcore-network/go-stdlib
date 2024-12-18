@@ -136,15 +136,7 @@ func (repo *abstractRepositoryImpl[T, K]) FindAllByKey(key, value string) ([]T, 
 	}
 
 	preloads := repo.self.GetPreloads()
-	if preloads == nil {
-		preloads = []string{}
-	}
-
-	db := repo.gorm
-	if len(preloads) > 0 {
-		db = applyPreloads(db, preloads)
-	}
-
+	db := applyPreloads(repo.gorm, preloads)
 	query := fmt.Sprintf("%s = ?", key)
 
 	if err := db.Where(query, value).Find(&entities).Error; err != nil {
