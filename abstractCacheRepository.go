@@ -72,6 +72,9 @@ type abstractCacheRepositoryImpl[V any] struct {
 
 // Get implements AbstractCacheRepository.
 func (repo *abstractCacheRepositoryImpl[V]) Get(key string) (*V, error) {
+	if repo.self != repo {
+		return repo.self.Get(key)
+	}
 	result, err := repo.client.Get(repo.ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
@@ -87,6 +90,9 @@ func (repo *abstractCacheRepositoryImpl[V]) Get(key string) (*V, error) {
 }
 
 func (repo *abstractCacheRepositoryImpl[V]) GetKeysByPatterns(pattern string) ([]string, error) {
+	if repo.self != repo {
+		return repo.self.GetKeysByPatterns(pattern)
+	}
 	var cursor uint64
 	var keys []string
 	for {
@@ -105,6 +111,9 @@ func (repo *abstractCacheRepositoryImpl[V]) GetKeysByPatterns(pattern string) ([
 
 // Set implements AbstractCacheRepository.
 func (repo *abstractCacheRepositoryImpl[V]) Set(key string, value V, expiration time.Duration) error {
+	if repo.self != repo {
+		return repo.self.Set(key, value, expiration)
+	}
 	data, err := serialize(value)
 	if err != nil {
 		return err
@@ -114,6 +123,9 @@ func (repo *abstractCacheRepositoryImpl[V]) Set(key string, value V, expiration 
 
 // Exists implements AbstractCacheRepository.
 func (repo *abstractCacheRepositoryImpl[V]) Exists(key string) (bool, error) {
+	if repo.self != repo {
+		return repo.self.Exists(key)
+	}
 	count, err := repo.client.Exists(repo.ctx, key).Result()
 	if err != nil {
 		return false, err
@@ -123,11 +135,17 @@ func (repo *abstractCacheRepositoryImpl[V]) Exists(key string) (bool, error) {
 
 // Del implements Abstrac tCacheRepository.
 func (repo *abstractCacheRepositoryImpl[V]) Del(key string) error {
+	if repo.self != repo {
+		return repo.self.Del(key)
+	}
 	return repo.client.Del(repo.ctx, key).Err()
 }
 
 // HGet retrieves a single field value from a hash.
 func (repo *abstractCacheRepositoryImpl[V]) HGet(key string, field string) (*V, error) {
+	if repo.self != repo {
+		return repo.self.HGet(key, field)
+	}
 	result, err := repo.client.HGet(repo.ctx, key, field).Result()
 	if err != nil {
 		if err == redis.Nil {
@@ -144,6 +162,9 @@ func (repo *abstractCacheRepositoryImpl[V]) HGet(key string, field string) (*V, 
 
 // HGetAll retrieves all fields and values from a hash.
 func (repo *abstractCacheRepositoryImpl[V]) HGetAll(key string) (map[string]V, error) {
+	if repo.self != repo {
+		return repo.self.HGetAll(key)
+	}
 	result, err := repo.client.HGetAll(repo.ctx, key).Result()
 	if err != nil {
 		return nil, err
@@ -159,8 +180,32 @@ func (repo *abstractCacheRepositoryImpl[V]) HGetAll(key string) (map[string]V, e
 	return fields, nil
 }
 
+func (repo *abstractCacheRepositoryImpl[V]) HGetFields(key string, fields ...string) (map[string]V, error) {
+	if repo.self != repo {
+		return repo.self.HGetFields(key, fields...)
+	}
+	result, err := repo.client.HMGet(repo.ctx, key, fields...).Result()
+	if err != nil {
+		return nil, err
+	}
+	values := make(map[string]V)
+	for i, field := range fields {
+		if result[i] != nil {
+			value, err := deserialize[V]([]byte(result[i].(string)), repo.isPrimitive)
+			if err != nil {
+				return nil, fmt.Errorf("failed to deserialize field %s: %w", field, err)
+			}
+			values[field] = value
+		}
+	}
+	return values, nil
+}
+
 // HSet sets a single field in a hash.
 func (repo *abstractCacheRepositoryImpl[V]) HSet(key string, field string, value V) error {
+	if repo.self != repo {
+		return repo.self.HSet(key, field, value)
+	}
 	data, err := serialize(value)
 	if err != nil {
 		return err
@@ -170,11 +215,17 @@ func (repo *abstractCacheRepositoryImpl[V]) HSet(key string, field string, value
 
 // HDel deletes a field from a hash.
 func (repo *abstractCacheRepositoryImpl[V]) HDel(key string, field string) error {
+	if repo.self != repo {
+		return repo.self.HDel(key, field)
+	}
 	return repo.client.HDel(repo.ctx, key, field).Err()
 }
 
 // HExists checks if a field exists in a hash.
 func (repo *abstractCacheRepositoryImpl[V]) HExists(key string, field string) (bool, error) {
+	if repo.self != repo {
+		return repo.self.HExists(key, field)
+	}
 	return repo.client.HExists(repo.ctx, key, field).Result()
 }
 
