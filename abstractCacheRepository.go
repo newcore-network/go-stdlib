@@ -44,6 +44,10 @@ type AbstractCacheRepository[V any] interface {
 	// The method returns a map of field names to values or an error if the operation fails.
 	HGetAll(key string) (map[string]any, error)
 
+	// HScan iterates over fields in a hash by a pattern.
+	// Returns the matching fields and their values.
+	HScan(key string, pattern string, count int64) (map[string]string, error)
+
 	// HGetFields retrieves specific fields and their associated values from a hash in Redis.
 	// The method returns a map of the requested field names to their values.
 	// Fields not found in the hash are excluded from the returned map.
@@ -158,6 +162,33 @@ func (repo *abstractCacheRepositoryImpl[V]) HGet(key string, field string) (*any
 		return nil, err
 	}
 	return &value, nil
+}
+
+func (repo *abstractCacheRepositoryImpl[V]) HScan(key string, pattern string, count int64) (map[string]string, error) {
+	if repo.self != nil && repo.self != repo {
+		return repo.self.HScan(key, pattern, count)
+	}
+
+	var cursor uint64
+	result := make(map[string]string)
+
+	for {
+		fields, newCursor, err := repo.client.HScan(repo.ctx, key, cursor, pattern, count).Result()
+		if err != nil {
+			return nil, err
+		}
+
+		for i := 0; i < len(fields); i += 2 {
+			result[fields[i]] = fields[i+1]
+		}
+
+		cursor = newCursor
+		if cursor == 0 {
+			break
+		}
+	}
+
+	return result, nil
 }
 
 // HGetAll retrieves all fields and values from a hash.
