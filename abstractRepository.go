@@ -136,12 +136,21 @@ func (repo *abstractRepositoryImpl[T, K]) FindAllByKey(key, value string) ([]T, 
 	}
 
 	preloads := repo.self.GetPreloads()
-	db := applyPreloads(repo.gorm, preloads)
+	if preloads == nil {
+		preloads = []string{}
+	}
+
+	db := repo.gorm
+	if len(preloads) > 0 {
+		db = applyPreloads(db, preloads)
+	}
+
 	query := fmt.Sprintf("%s = ?", key)
 
 	if err := db.Where(query, value).Find(&entities).Error; err != nil {
 		return entities, err
 	}
+
 	return entities, nil
 }
 
@@ -199,7 +208,7 @@ func (repo *abstractRepositoryImpl[T, K]) Restore(tx *gorm.DB, id K) error {
 }
 
 func (repo *abstractRepositoryImpl[T, K]) GetPreloads() []string {
-	return nil // Default: no preloads
+	return []string{} // Default: no preloads
 }
 
 func (repo *abstractRepositoryImpl[T, K]) GetType() string {
