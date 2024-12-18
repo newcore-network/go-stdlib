@@ -193,9 +193,6 @@ func (repo *abstractCacheRepositoryImpl[V]) HScan(key string, pattern string, co
 
 // HGetAll retrieves all fields and values from a hash.
 func (repo *abstractCacheRepositoryImpl[V]) HGetAll(key string) (map[string]any, error) {
-	if repo.self != repo {
-		return repo.self.HGetAll(key)
-	}
 	result, err := repo.client.HGetAll(repo.ctx, key).Result()
 	if err != nil {
 		return nil, err
