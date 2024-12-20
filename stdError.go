@@ -74,6 +74,18 @@ func ErrUnauthorized(c fiber.Ctx, err error) error {
 	return c.Status(fiber.StatusUnauthorized).JSON(response)
 }
 
+// ErrForbbiden logs a forbidden error and returns a JSON response
+func ErrForbbiden(c fiber.Ctx, err error) error {
+	response := StandardError{
+		ErrorMessage: "FORBBIDEN",
+	}
+	Warn("forbidden access", map[string]interface{}{
+		"route":  c.Path(),
+		"method": c.Method(),
+	})
+	return c.Status(fiber.StatusForbidden).JSON(response)
+}
+
 // ErrUUIDParse logs a bad UUID error and returns a JSON response
 func ErrUUIDParse(c fiber.Ctx, id string) error {
 	response := StandardError{
