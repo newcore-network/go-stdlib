@@ -38,11 +38,11 @@ type AbstractCacheRepository[V any] interface {
 	// HGet retrieves a single field value from a hash in Redis.
 	// The method returns the value associated with the specified field
 	// and nil if the field does not exist or an error occurs.
-	HGet(key string, field string) (*any, error)
+	HGet(key string, field string) (*V, error)
 
 	// HGetAll retrieves all fields and their associated values from a hash in Redis.
 	// The method returns a map of field names to values or an error if the operation fails.
-	HGetAll(key string) (map[string]any, error)
+	HGetAll(key string) (map[string]V, error)
 
 	// HScan iterates over fields in a hash by a pattern.
 	// Returns the matching fields and their values.
@@ -51,12 +51,12 @@ type AbstractCacheRepository[V any] interface {
 	// HGetFields retrieves specific fields and their associated values from a hash in Redis.
 	// The method returns a map of the requested field names to their values.
 	// Fields not found in the hash are excluded from the returned map.
-	HGetFields(key string, fields ...string) (map[string]any, error)
+	HGetFields(key string, fields ...string) (map[string]V, error)
 
 	// HSet sets a single field in a hash in Redis.
 	// This method stores the specified value under the given field name,
 	// overwriting any existing value.
-	HSet(key string, field string, value any) error
+	HSet(key string, field string, value V) error
 
 	// HDel deletes a specific field from a hash in Redis.
 	// This method removes the field and its value, returning an error if the operation fails.
@@ -146,7 +146,7 @@ func (repo *abstractCacheRepositoryImpl[V]) Del(key string) error {
 }
 
 // HGet retrieves a single field value from a hash.
-func (repo *abstractCacheRepositoryImpl[V]) HGet(key string, field string) (*any, error) {
+func (repo *abstractCacheRepositoryImpl[V]) HGet(key string, field string) (*V, error) {
 	if repo.self != repo {
 		return repo.self.HGet(key, field)
 	}
@@ -157,7 +157,7 @@ func (repo *abstractCacheRepositoryImpl[V]) HGet(key string, field string) (*any
 		}
 		return nil, err
 	}
-	var value any
+	var value V
 	if err := sonic.Unmarshal([]byte(result), &value); err != nil {
 		return nil, err
 	}
@@ -188,14 +188,14 @@ func (repo *abstractCacheRepositoryImpl[V]) HScan(key string, pattern string, co
 }
 
 // HGetAll retrieves all fields and values from a hash.
-func (repo *abstractCacheRepositoryImpl[V]) HGetAll(key string) (map[string]any, error) {
+func (repo *abstractCacheRepositoryImpl[V]) HGetAll(key string) (map[string]V, error) {
 	result, err := repo.client.HGetAll(repo.ctx, key).Result()
 	if err != nil {
 		return nil, err
 	}
-	fields := make(map[string]any, len(result))
+	fields := make(map[string]V, len(result))
 	for k, v := range result {
-		var value any
+		var value V
 		if err := sonic.Unmarshal([]byte(v), &value); err != nil {
 			return nil, fmt.Errorf("failed to deserialize field %s: %w", k, err)
 		}
@@ -204,7 +204,7 @@ func (repo *abstractCacheRepositoryImpl[V]) HGetAll(key string) (map[string]any,
 	return fields, nil
 }
 
-func (repo *abstractCacheRepositoryImpl[V]) HGetFields(key string, fields ...string) (map[string]any, error) {
+func (repo *abstractCacheRepositoryImpl[V]) HGetFields(key string, fields ...string) (map[string]V, error) {
 	if repo.self != repo {
 		return repo.self.HGetFields(key, fields...)
 	}
@@ -212,10 +212,10 @@ func (repo *abstractCacheRepositoryImpl[V]) HGetFields(key string, fields ...str
 	if err != nil {
 		return nil, err
 	}
-	values := make(map[string]any)
+	values := make(map[string]V)
 	for i, field := range fields {
 		if result[i] != nil {
-			var value any
+			var value V
 			if err := sonic.Unmarshal([]byte(result[i].(string)), &value); err != nil {
 				return nil, fmt.Errorf("failed to deserialize field %s: %w", field, err)
 			}
@@ -226,7 +226,7 @@ func (repo *abstractCacheRepositoryImpl[V]) HGetFields(key string, fields ...str
 }
 
 // HSet sets a single field in a hash.
-func (repo *abstractCacheRepositoryImpl[V]) HSet(key string, field string, value any) error {
+func (repo *abstractCacheRepositoryImpl[V]) HSet(key string, field string, value V) error {
 	if repo.self != repo {
 		return repo.self.HSet(key, field, value)
 	}
@@ -264,7 +264,7 @@ func isPrimitiveType(value any) bool {
 }
 
 // Helper function to serialize a value.
-func serialize[V any](value V) ([]byte, error) {
+func serialize[T any](value T) ([]byte, error) {
 	if isPrimitiveType(value) {
 		return []byte(fmt.Sprintf("%v", value)), nil
 	}
@@ -272,10 +272,10 @@ func serialize[V any](value V) ([]byte, error) {
 }
 
 // Helper function to deserialize data.
-func deserialize[V any](data []byte, isPrimitive bool) (V, error) {
-	var value V
+func deserialize[T any](data []byte, isPrimitive bool) (T, error) {
+	var value T
 	if isPrimitive {
-		return any(string(data)).(V), nil
+		return any(string(data)).(T), nil
 	}
 	if err := sonic.Unmarshal(data, &value); err != nil {
 		return value, fmt.Errorf("failed to deserialize value: %w", err)
