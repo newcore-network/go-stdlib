@@ -233,10 +233,19 @@ func (repo *abstractCacheRepositoryImpl[V]) HSet(key string, field string, value
 	if repo.self != repo {
 		return repo.self.HSet(key, field, value)
 	}
-	data, err := sonic.Marshal(value)
-	if err != nil {
-		return err
+
+	var data []byte
+	switch v := value.(type) {
+	case string:
+		data = []byte(v)
+	default:
+		var err error
+		data, err = sonic.Marshal(v)
+		if err != nil {
+			return err
+		}
 	}
+
 	return repo.client.HSet(repo.ctx, key, field, data).Err()
 }
 
@@ -244,7 +253,22 @@ func (repo *abstractCacheRepositoryImpl[V]) HMSet(key string, fields map[string]
 	if repo.self != repo {
 		return repo.self.HMSet(key, fields)
 	}
-	return repo.client.HMSet(repo.ctx, key, fields).Err()
+
+	serializedFields := make(map[string]any, len(fields))
+	for field, value := range fields {
+		switch v := value.(type) {
+		case string:
+			serializedFields[field] = v
+		default:
+			data, err := sonic.Marshal(v)
+			if err != nil {
+				return fmt.Errorf("failed to serialize field %s: %w", field, err)
+			}
+			serializedFields[field] = string(data)
+		}
+	}
+
+	return repo.client.HMSet(repo.ctx, key, serializedFields).Err()
 }
 
 // HDel deletes a field from a hash.
