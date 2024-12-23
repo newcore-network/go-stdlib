@@ -58,6 +58,9 @@ type AbstractCacheRepository[V any] interface {
 	// overwriting any existing value.
 	HSet(key string, field string, value any) error
 
+	// HMSet sets multiple fields in a hash in Redis.
+	HMSet(key string, fields map[string]any) error
+
 	// HDel deletes a specific field from a hash in Redis.
 	// This method removes the field and its value, returning an error if the operation fails.
 	HDel(key string, field string) error
@@ -235,6 +238,13 @@ func (repo *abstractCacheRepositoryImpl[V]) HSet(key string, field string, value
 		return err
 	}
 	return repo.client.HSet(repo.ctx, key, field, data).Err()
+}
+
+func (repo *abstractCacheRepositoryImpl[V]) HMSet(key string, fields map[string]any) error {
+	if repo.self != repo {
+		return repo.self.HMSet(key, fields)
+	}
+	return repo.client.HMSet(repo.ctx, key, fields).Err()
 }
 
 // HDel deletes a field from a hash.
