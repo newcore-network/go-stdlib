@@ -17,7 +17,6 @@ Explore the available utilities in `docs/` folder
 ## Getting Started
 ### Prerequisites
 Ensure you have the following in place before using the libraries:
-- Configured GOPRIVATE environment variable: This variable is required to access the Newcore private repository.
 - Using Fiber version 3.x
 - Go version 1.23 or higher: Ensure you have the latest version of Go installed on your system.
 - .env file: Required for loading configuration details such as database credentials. Refer to the .env.example file in the repository for a template to get started.
