@@ -19,6 +19,8 @@ type StdLibConfiguration struct {
 	RedisHost string
 	RedisPort int
 	RedisDB   int
+
+	DevMode bool
 }
 
 // LoadCfg loads the configuration from the specified file or defaults to ".env".
@@ -67,5 +69,7 @@ func LoadCfg(file ...string) StdLibConfiguration {
 		RedisHost: os.Getenv("REDIS_HOST"),
 		RedisPort: redisPort,
 		RedisDB:   redisDB,
+
+		DevMode: os.Getenv("DEV_MODE") == "true",
 	}
 }
