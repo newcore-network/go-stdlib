@@ -9,16 +9,17 @@ import (
 )
 
 type StdLibConfiguration struct {
-	Host     string
-	User     string
-	Password string
-	Database string
-	Port     int
-	SSLMode  string
+	DBHost     string
+	DBUser     string
+	DBPassword string
+	DBDatabase string
+	DBPort     int
+	DBSSLMode  string
 
-	RedisHost string
-	RedisPort int
-	RedisDB   int
+	RedisHost     string
+	RedisPort     int
+	RedisPassword string
+	RedisDB       int
 
 	DevMode bool
 }
@@ -59,16 +60,17 @@ func LoadCfg(file ...string) StdLibConfiguration {
 	}
 
 	return StdLibConfiguration{
-		Host:     os.Getenv("POSTGRES_HOST"),
-		User:     os.Getenv("POSTGRES_USER"),
-		Password: os.Getenv("POSTGRES_PASSWORD"),
-		Database: os.Getenv("POSTGRES_DATABASE"),
-		Port:     port,
-		SSLMode:  SSLMode,
+		DBHost:     os.Getenv("POSTGRES_HOST"),
+		DBUser:     os.Getenv("POSTGRES_USER"),
+		DBPassword: os.Getenv("POSTGRES_PASSWORD"),
+		DBDatabase: os.Getenv("POSTGRES_DATABASE"),
+		DBPort:     port,
+		DBSSLMode:  SSLMode,
 
-		RedisHost: os.Getenv("REDIS_HOST"),
-		RedisPort: redisPort,
-		RedisDB:   redisDB,
+		RedisHost:     os.Getenv("REDIS_HOST"),
+		RedisPort:     redisPort,
+		RedisPassword: os.Getenv("REDIS_PASSWORD"),
+		RedisDB:       redisDB,
 
 		DevMode: os.Getenv("DEV_MODE") == "true",
 	}

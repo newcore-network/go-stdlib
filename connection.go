@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -66,8 +65,8 @@ func NewConnection(driver Connection, cfg StdLibConfiguration) (*DBWrapper, erro
 // If the connection fails, it panics.
 func NewRedisConnection(ctx context.Context, cfg StdLibConfiguration) *redis.Client {
 	client := redis.NewClient(&redis.Options{
-		Addr:     cfg.RedisHost + ":" + strconv.Itoa(cfg.RedisPort),
-		Password: cfg.Password,
+		Addr:     fmt.Sprintf("%s:%d", cfg.RedisHost, cfg.RedisPort),
+		Password: cfg.RedisPassword,
 		DB:       cfg.RedisDB,
 	})
 
