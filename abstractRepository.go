@@ -11,7 +11,7 @@ import (
 
 // ID is a generic type that represents the primary key of the entity, only accepting uint or uuid.UUID.
 type ID interface {
-	uint | uuid.UUID
+	int | int32 | int64 | uint | uint32 | uint64 | string | uuid.UUID
 }
 
 // Identifiable is a generic interface that represents an entity that has an ID.
