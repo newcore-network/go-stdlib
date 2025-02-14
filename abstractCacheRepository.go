@@ -10,13 +10,13 @@ import (
 )
 
 // AbstractCacheRepository defines a generic interface for interacting with a Redis-based cache.
-// V represents the type of the values stored in the cache.
-type AbstractCacheRepository[V any] interface {
+// T represents the type of the values stored in the cache.
+type AbstractCacheRepository[T any] interface {
 
 	// Get retrieves a value by its key from the cache.
 	// If the value is a struct, it will be deserialized from JSON.
 	// Returns a pointer to the value or nil if the key does not exist.
-	Get(key string) (valueModel *V, err error)
+	Get(key string) (valueModel T, err error)
 
 	// GetKeysByPatterns retrieves keys by a pattern from the cache.
 	// Returns a slice of keys that match the pattern.
@@ -25,7 +25,7 @@ type AbstractCacheRepository[V any] interface {
 	// Set stores a value in the cache with the specified expiration time.
 	// If the value is a struct, it will be serialized to JSON.
 	// Returns an error if the operation fails.
-	Set(key string, value V, expiration time.Duration) error
+	Set(key string, value T, expiration time.Duration) error
 
 	// Del deletes a value from the cache by its key.
 	// Returns an error if the operation fails.
@@ -70,33 +70,35 @@ type AbstractCacheRepository[V any] interface {
 	HExists(key string, field string) (bool, error)
 }
 
-type abstractCacheRepositoryImpl[V any] struct {
+type abstractCacheRepositoryImpl[T any] struct {
 	client      *redis.Client
 	ctx         context.Context
 	isPrimitive bool
-	self        AbstractCacheRepository[V]
+	self        AbstractCacheRepository[T]
 }
 
 // Get implements AbstractCacheRepository.
-func (repo *abstractCacheRepositoryImpl[V]) Get(key string) (*V, error) {
+func (repo *abstractCacheRepositoryImpl[T]) Get(key string) (T, error) {
+	var value T
+
 	if repo.self != repo {
 		return repo.self.Get(key)
 	}
 	result, err := repo.client.Get(repo.ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return nil, nil
+			return value, nil
 		}
-		return nil, err
+		return value, err
 	}
-	value, err := deserialize[V]([]byte(result), repo.isPrimitive)
+	value, err = deserialize[T]([]byte(result), repo.isPrimitive)
 	if err != nil {
-		return nil, err
+		return value, err
 	}
-	return &value, nil
+	return value, nil
 }
 
-func (repo *abstractCacheRepositoryImpl[V]) GetKeysByPatterns(pattern string) ([]string, error) {
+func (repo *abstractCacheRepositoryImpl[T]) GetKeysByPatterns(pattern string) ([]string, error) {
 	if repo.self != repo {
 		return repo.self.GetKeysByPatterns(pattern)
 	}
@@ -117,7 +119,7 @@ func (repo *abstractCacheRepositoryImpl[V]) GetKeysByPatterns(pattern string) ([
 }
 
 // Set implements AbstractCacheRepository.
-func (repo *abstractCacheRepositoryImpl[V]) Set(key string, value V, expiration time.Duration) error {
+func (repo *abstractCacheRepositoryImpl[T]) Set(key string, value T, expiration time.Duration) error {
 	if repo.self != repo {
 		return repo.self.Set(key, value, expiration)
 	}
@@ -129,7 +131,7 @@ func (repo *abstractCacheRepositoryImpl[V]) Set(key string, value V, expiration 
 }
 
 // Exists implements AbstractCacheRepository.
-func (repo *abstractCacheRepositoryImpl[V]) Exists(key string) (bool, error) {
+func (repo *abstractCacheRepositoryImpl[T]) Exists(key string) (bool, error) {
 	if repo.self != repo {
 		return repo.self.Exists(key)
 	}
@@ -141,7 +143,7 @@ func (repo *abstractCacheRepositoryImpl[V]) Exists(key string) (bool, error) {
 }
 
 // Del implements Abstrac tCacheRepository.
-func (repo *abstractCacheRepositoryImpl[V]) Del(key string) error {
+func (repo *abstractCacheRepositoryImpl[T]) Del(key string) error {
 	if repo.self != repo {
 		return repo.self.Del(key)
 	}
@@ -149,7 +151,7 @@ func (repo *abstractCacheRepositoryImpl[V]) Del(key string) error {
 }
 
 // HGet retrieves a single field value from a hash.
-func (repo *abstractCacheRepositoryImpl[V]) HGet(key string, field string) (*any, error) {
+func (repo *abstractCacheRepositoryImpl[T]) HGet(key string, field string) (*any, error) {
 	if repo.self != repo {
 		return repo.self.HGet(key, field)
 	}
@@ -167,7 +169,7 @@ func (repo *abstractCacheRepositoryImpl[V]) HGet(key string, field string) (*any
 	return &value, nil
 }
 
-func (repo *abstractCacheRepositoryImpl[V]) HScan(key string, pattern string, count int64) (map[string]string, error) {
+func (repo *abstractCacheRepositoryImpl[T]) HScan(key string, pattern string, count int64) (map[string]string, error) {
 	var cursor uint64
 	result := make(map[string]string)
 
@@ -191,7 +193,7 @@ func (repo *abstractCacheRepositoryImpl[V]) HScan(key string, pattern string, co
 }
 
 // HGetAll retrieves all fields and values from a hash.
-func (repo *abstractCacheRepositoryImpl[V]) HGetAll(key string) (map[string]any, error) {
+func (repo *abstractCacheRepositoryImpl[T]) HGetAll(key string) (map[string]any, error) {
 	result, err := repo.client.HGetAll(repo.ctx, key).Result()
 	if err != nil {
 		return nil, err
@@ -207,7 +209,7 @@ func (repo *abstractCacheRepositoryImpl[V]) HGetAll(key string) (map[string]any,
 	return fields, nil
 }
 
-func (repo *abstractCacheRepositoryImpl[V]) HGetFields(key string, fields ...string) (map[string]any, error) {
+func (repo *abstractCacheRepositoryImpl[T]) HGetFields(key string, fields ...string) (map[string]any, error) {
 	if repo.self != repo {
 		return repo.self.HGetFields(key, fields...)
 	}
@@ -229,7 +231,7 @@ func (repo *abstractCacheRepositoryImpl[V]) HGetFields(key string, fields ...str
 }
 
 // HSet sets a single field in a hash.
-func (repo *abstractCacheRepositoryImpl[V]) HSet(key string, field string, value any) error {
+func (repo *abstractCacheRepositoryImpl[T]) HSet(key string, field string, value any) error {
 	if repo.self != repo {
 		return repo.self.HSet(key, field, value)
 	}
@@ -249,7 +251,7 @@ func (repo *abstractCacheRepositoryImpl[V]) HSet(key string, field string, value
 	return repo.client.HSet(repo.ctx, key, field, data).Err()
 }
 
-func (repo *abstractCacheRepositoryImpl[V]) HMSet(key string, fields map[string]any) error {
+func (repo *abstractCacheRepositoryImpl[T]) HMSet(key string, fields map[string]any) error {
 	if repo.self != repo {
 		return repo.self.HMSet(key, fields)
 	}
@@ -272,7 +274,7 @@ func (repo *abstractCacheRepositoryImpl[V]) HMSet(key string, fields map[string]
 }
 
 // HDel deletes a field from a hash.
-func (repo *abstractCacheRepositoryImpl[V]) HDel(key string, field string) error {
+func (repo *abstractCacheRepositoryImpl[T]) HDel(key string, field string) error {
 	if repo.self != repo {
 		return repo.self.HDel(key, field)
 	}
@@ -280,7 +282,7 @@ func (repo *abstractCacheRepositoryImpl[V]) HDel(key string, field string) error
 }
 
 // HExists checks if a field exists in a hash.
-func (repo *abstractCacheRepositoryImpl[V]) HExists(key string, field string) (bool, error) {
+func (repo *abstractCacheRepositoryImpl[T]) HExists(key string, field string) (bool, error) {
 	if repo.self != repo {
 		return repo.self.HExists(key, field)
 	}
@@ -317,11 +319,11 @@ func deserialize[T any](data []byte, isPrimitive bool) (T, error) {
 	return value, nil
 }
 
-func CreateCacheRepository[V any](redisClient *redis.Client, ctx context.Context, self AbstractCacheRepository[V]) *abstractCacheRepositoryImpl[V] {
-	repo := &abstractCacheRepositoryImpl[V]{
+func CreateCacheRepository[T any](redisClient *redis.Client, ctx context.Context, self AbstractCacheRepository[T]) *abstractCacheRepositoryImpl[T] {
+	repo := &abstractCacheRepositoryImpl[T]{
 		client:      redisClient,
 		ctx:         ctx,
-		isPrimitive: isPrimitiveType(new(V)),
+		isPrimitive: isPrimitiveType(new(T)),
 		self:        self,
 	}
 	return repo
