@@ -64,6 +64,10 @@ type AbstractRepository[T Identifiable[K], K ID] interface {
 
 	// GetType returns the types defined of the repository.
 	GetType() string
+
+	// transactionCheck if is within a transactional context to use the
+	// transaction or use the current repository
+	TransactionCheck(tx *gorm.DB) *gorm.DB
 }
 
 type abstractRepositoryImpl[T Identifiable[K], K ID] struct {
@@ -208,6 +212,16 @@ func (repo *abstractRepositoryImpl[T, K]) GetType() string {
 	kType := reflect.TypeOf(new(K)).Elem().String()
 
 	return fmt.Sprintf("abstractRepositoryImpl[T: %s, K: %s]", tType, kType)
+}
+
+func (repo *abstractRepositoryImpl[T, K]) TransactionCheck(tx *gorm.DB) *gorm.DB {
+	db := tx
+	if db == nil {
+		db = repo.gorm
+		return db
+	}
+
+	return db
 }
 
 // Helper function createInstance dynamically creates a new instance of type T.
