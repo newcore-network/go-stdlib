@@ -2,6 +2,7 @@ package stdlib
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -68,6 +69,9 @@ type AbstractCacheRepository[T any] interface {
 	// HExists checks if a specific field exists in a hash in Redis.
 	// The method returns true if the field exists, false otherwise.
 	HExists(key string, field string) (bool, error)
+
+	// NewPipeline creates a new pipeline, which allows you to chain commands and add options (e.g a TTL) in a convenient way.
+	NewPipeline() *CachePipeline
 }
 
 type abstractCacheRepositoryImpl[T any] struct {
@@ -235,6 +239,9 @@ func (repo *abstractCacheRepositoryImpl[T]) HSet(key string, field string, value
 	if repo.self != repo {
 		return repo.self.HSet(key, field, value)
 	}
+	if key == "" || field == "" {
+		return errors.New("key and field must not be empty")
+	}
 
 	var data []byte
 	switch v := value.(type) {
@@ -247,7 +254,6 @@ func (repo *abstractCacheRepositoryImpl[T]) HSet(key string, field string, value
 			return err
 		}
 	}
-
 	return repo.client.HSet(repo.ctx, key, field, data).Err()
 }
 
@@ -287,6 +293,13 @@ func (repo *abstractCacheRepositoryImpl[T]) HExists(key string, field string) (b
 		return repo.self.HExists(key, field)
 	}
 	return repo.client.HExists(repo.ctx, key, field).Result()
+}
+
+func (repo *abstractCacheRepositoryImpl[T]) NewPipeline() *CachePipeline {
+	return &CachePipeline{
+		pipe: repo.client.Pipeline(),
+		ctx:  repo.ctx,
+	}
 }
 
 // Helper function to determine if a type is primitive.
