@@ -303,6 +303,41 @@ func deserialize[T any](data []byte, isPrimitive bool) (T, error) {
 	return value, nil
 }
 
+// CreateCacheRepository initializes a new instance of 'abstractCacheRepositoryImpl'
+// with the given Redis client, context, and an self-reference.
+//
+// This function serves as a factory for creating a generic cache repository
+// implementation, ensuring proper dependency injection and type management.
+//
+// Generic Parameters:
+//   - T: The type of data that will be stored and retrieved from the cache.
+//
+// Parameters:
+//   - redisClient (*redis.Client): The Redis client instance used for cache operations.
+//     This must not be nil, otherwise the function will panic.
+//   - ctx (context.Context): The execution context, used for managing timeouts
+//     and cancellations in cache operations. This must not be nil, otherwise the function will panic.
+//   - self (AbstractCacheRepository[T]): A reference to a specific repository implementation.
+//     This is used to override or add methods. And is the way to represente your concrete type.
+//
+// Returns:
+//   - *abstractCacheRepositoryImpl[T]: A pointer to the newly created cache repository instance.
+//
+// Panics:
+//   - If `redisClient` is nil, it panics with the message "[lib] redisClient is nil".
+//   - If `ctx` is nil, it panics with the message "[lib] ctx is nil".
+//
+// Example Usage:
+//
+//	type AccountCacheRepository struct {
+//	stdlib.AbstractCacheRepository[*data.Account] // here is your concrete type save (struct pointer)
+//	}
+//
+//	func NewAccountCacheRepository(client *redis.Client, ctx context.Context) *AccountCacheRepository {
+//		repo := &AccountCacheRepository{} // need to be a pointer to reference your repository
+//		repo.AbstractCacheRepository = stdlib.CreateCacheRepository(client, ctx, repo)
+//		return repo
+//	}
 func CreateCacheRepository[T any](redisClient *redis.Client, ctx context.Context, self AbstractCacheRepository[T]) *abstractCacheRepositoryImpl[T] {
 	if redisClient == nil {
 		panic("[lib] redisClient is nil")
