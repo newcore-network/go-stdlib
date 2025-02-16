@@ -1,7 +1,6 @@
 package stdlib
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 
@@ -59,7 +58,7 @@ type AbstractRepository[T Identifiable[K], K ID] interface {
 
 	// GetPreloads returns the default preloads for the repository.
 	// 	This need to be overriden by the concrete implementation!!
-	// by default is nil
+	// by default is a empty string slice
 	GetPreloads() []string
 
 	// GetType returns the types defined of the repository.
@@ -78,12 +77,14 @@ type abstractRepositoryImpl[T Identifiable[K], K ID] struct {
 // FindAll implements AbstractRepository.
 func (repo *abstractRepositoryImpl[T, K]) FindAll() ([]T, error) {
 	var entities []T
+	var preloads []string
 
 	if repo.self == nil {
-		return entities, errors.New("self reference is nil in repository")
+		preloads = repo.GetPreloads()
+	} else {
+		preloads = repo.self.GetPreloads()
 	}
 
-	preloads := repo.self.GetPreloads()
 	db := applyPreloads(repo.gorm, preloads)
 
 	if err := db.Find(&entities).Error; err != nil {
@@ -99,12 +100,14 @@ func (repo *abstractRepositoryImpl[T, K]) FindAll() ([]T, error) {
 // FindByID implements AbstractRepository.
 func (repo *abstractRepositoryImpl[T, K]) FindByID(id K) (T, error) {
 	var entity T
+	var preloads []string
 
 	if repo.self == nil {
-		return entity, errors.New("self reference is nil in repository")
+		preloads = repo.GetPreloads()
+	} else {
+		preloads = repo.self.GetPreloads()
 	}
 
-	preloads := repo.self.GetPreloads()
 	db := applyPreloads(repo.gorm, preloads)
 
 	if err := db.Where("id = ?", id).First(&entity).Error; err != nil {
@@ -116,12 +119,14 @@ func (repo *abstractRepositoryImpl[T, K]) FindByID(id K) (T, error) {
 // FirstByKey implements AbstractRepository.
 func (repo *abstractRepositoryImpl[T, K]) FirstByKey(key, value string) (T, error) {
 	var entity T
+	var preloads []string
 
 	if repo.self == nil {
-		return entity, errors.New("self reference is nil in repository")
+		preloads = repo.GetPreloads()
+	} else {
+		preloads = repo.self.GetPreloads()
 	}
 
-	preloads := repo.self.GetPreloads()
 	db := applyPreloads(repo.gorm, preloads)
 	query := fmt.Sprintf("%s = ?", key)
 
@@ -134,12 +139,14 @@ func (repo *abstractRepositoryImpl[T, K]) FirstByKey(key, value string) (T, erro
 // FindByKey implements AbstractRepository.
 func (repo *abstractRepositoryImpl[T, K]) FindAllByKey(key, value string) ([]T, error) {
 	var entities []T
+	var preloads []string
 
 	if repo.self == nil {
-		return entities, errors.New("self reference is nil in repository")
+		preloads = repo.GetPreloads()
+	} else {
+		preloads = repo.self.GetPreloads()
 	}
 
-	preloads := repo.self.GetPreloads()
 	db := applyPreloads(repo.gorm, preloads)
 	query := fmt.Sprintf("%s = ?", key)
 
@@ -250,13 +257,6 @@ func (repo *abstractRepositoryImpl[T, K]) transCheck(tx *gorm.DB) *gorm.DB {
 	return db
 }
 
-// NewAbstractRepository creates a new instance of AbstractRepositoryImpl with the provided gormDB and self.
-//
-// Deprecated: use CreateRepository instead
-func NewAbstractRepository[T Identifiable[K], K ID](gorm *gorm.DB, self AbstractRepository[T, K]) AbstractRepository[T, K] {
-	return &abstractRepositoryImpl[T, K]{gorm: gorm, self: self}
-}
-
 // CreateRepository creates a new instance of AbstractRepositoryImpl with the provided gormDB and self.
 //
 // example:
@@ -271,6 +271,13 @@ func NewAbstractRepository[T Identifiable[K], K ID](gorm *gorm.DB, self Abstract
 //		}
 //	}
 func CreateRepository[T Identifiable[K], K ID](gormDB *gorm.DB, self AbstractRepository[T, K]) *abstractRepositoryImpl[T, K] {
+	if gormDB == nil {
+		panic("[lib] gormDB is nil")
+	}
+	if self == nil {
+		panic("[lib] self is nil")
+	}
+
 	repo := &abstractRepositoryImpl[T, K]{
 		gorm: gormDB,
 		self: self,

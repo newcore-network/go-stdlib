@@ -78,16 +78,12 @@ type abstractCacheRepositoryImpl[T any] struct {
 	client      *redis.Client
 	ctx         context.Context
 	isPrimitive bool
-	self        AbstractCacheRepository[T]
 }
 
 // Get implements AbstractCacheRepository.
 func (repo *abstractCacheRepositoryImpl[T]) Get(key string) (T, error) {
 	var value T
 
-	if repo.self != repo {
-		return repo.self.Get(key)
-	}
 	result, err := repo.client.Get(repo.ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
@@ -103,9 +99,6 @@ func (repo *abstractCacheRepositoryImpl[T]) Get(key string) (T, error) {
 }
 
 func (repo *abstractCacheRepositoryImpl[T]) GetKeysByPatterns(pattern string) ([]string, error) {
-	if repo.self != repo {
-		return repo.self.GetKeysByPatterns(pattern)
-	}
 	var cursor uint64
 	var keys []string
 	for {
@@ -124,9 +117,6 @@ func (repo *abstractCacheRepositoryImpl[T]) GetKeysByPatterns(pattern string) ([
 
 // Set implements AbstractCacheRepository.
 func (repo *abstractCacheRepositoryImpl[T]) Set(key string, value T, expiration time.Duration) error {
-	if repo.self != repo {
-		return repo.self.Set(key, value, expiration)
-	}
 	data, err := serialize(value)
 	if err != nil {
 		return err
@@ -136,9 +126,6 @@ func (repo *abstractCacheRepositoryImpl[T]) Set(key string, value T, expiration 
 
 // Exists implements AbstractCacheRepository.
 func (repo *abstractCacheRepositoryImpl[T]) Exists(key string) (bool, error) {
-	if repo.self != repo {
-		return repo.self.Exists(key)
-	}
 	count, err := repo.client.Exists(repo.ctx, key).Result()
 	if err != nil {
 		return false, err
@@ -148,17 +135,11 @@ func (repo *abstractCacheRepositoryImpl[T]) Exists(key string) (bool, error) {
 
 // Del implements Abstrac tCacheRepository.
 func (repo *abstractCacheRepositoryImpl[T]) Del(key string) error {
-	if repo.self != repo {
-		return repo.self.Del(key)
-	}
 	return repo.client.Del(repo.ctx, key).Err()
 }
 
 // HGet retrieves a single field value from a hash.
 func (repo *abstractCacheRepositoryImpl[T]) HGet(key string, field string) (*any, error) {
-	if repo.self != repo {
-		return repo.self.HGet(key, field)
-	}
 	result, err := repo.client.HGet(repo.ctx, key, field).Result()
 	if err != nil {
 		if err == redis.Nil {
@@ -214,9 +195,7 @@ func (repo *abstractCacheRepositoryImpl[T]) HGetAll(key string) (map[string]any,
 }
 
 func (repo *abstractCacheRepositoryImpl[T]) HGetFields(key string, fields ...string) (map[string]any, error) {
-	if repo.self != repo {
-		return repo.self.HGetFields(key, fields...)
-	}
+
 	result, err := repo.client.HMGet(repo.ctx, key, fields...).Result()
 	if err != nil {
 		return nil, err
@@ -236,9 +215,7 @@ func (repo *abstractCacheRepositoryImpl[T]) HGetFields(key string, fields ...str
 
 // HSet sets a single field in a hash.
 func (repo *abstractCacheRepositoryImpl[T]) HSet(key string, field string, value any) error {
-	if repo.self != repo {
-		return repo.self.HSet(key, field, value)
-	}
+
 	if key == "" || field == "" {
 		return errors.New("key and field must not be empty")
 	}
@@ -258,9 +235,6 @@ func (repo *abstractCacheRepositoryImpl[T]) HSet(key string, field string, value
 }
 
 func (repo *abstractCacheRepositoryImpl[T]) HMSet(key string, fields map[string]any) error {
-	if repo.self != repo {
-		return repo.self.HMSet(key, fields)
-	}
 
 	serializedFields := make(map[string]any, len(fields))
 	for field, value := range fields {
@@ -281,17 +255,13 @@ func (repo *abstractCacheRepositoryImpl[T]) HMSet(key string, fields map[string]
 
 // HDel deletes a field from a hash.
 func (repo *abstractCacheRepositoryImpl[T]) HDel(key string, field string) error {
-	if repo.self != repo {
-		return repo.self.HDel(key, field)
-	}
+
 	return repo.client.HDel(repo.ctx, key, field).Err()
 }
 
 // HExists checks if a field exists in a hash.
 func (repo *abstractCacheRepositoryImpl[T]) HExists(key string, field string) (bool, error) {
-	if repo.self != repo {
-		return repo.self.HExists(key, field)
-	}
+
 	return repo.client.HExists(repo.ctx, key, field).Result()
 }
 
@@ -332,12 +302,17 @@ func deserialize[T any](data []byte, isPrimitive bool) (T, error) {
 	return value, nil
 }
 
-func CreateCacheRepository[T any](redisClient *redis.Client, ctx context.Context, self AbstractCacheRepository[T]) *abstractCacheRepositoryImpl[T] {
+func CreateCacheRepository[T any](redisClient *redis.Client, ctx context.Context) *abstractCacheRepositoryImpl[T] {
+	if redisClient == nil {
+		panic("[lib] redisClient is nil")
+	}
+	if ctx == nil {
+		panic("[lib] ctx is nil")
+	}
 	repo := &abstractCacheRepositoryImpl[T]{
 		client:      redisClient,
 		ctx:         ctx,
 		isPrimitive: isPrimitiveType(new(T)),
-		self:        self,
 	}
 	return repo
 }
