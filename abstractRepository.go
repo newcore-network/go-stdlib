@@ -257,19 +257,45 @@ func (repo *abstractRepositoryImpl[T, K]) transCheck(tx *gorm.DB) *gorm.DB {
 	return db
 }
 
-// CreateRepository creates a new instance of AbstractRepositoryImpl with the provided gormDB and self.
+// CreateRepository initializes a new instance of `abstractRepositoryImpl`
+// with the provided GORM database instance and a self-reference.
 //
-// example:
+// This function acts as a factory method for setting up a generic database repository,
+// ensuring proper dependency injection and type handling.
 //
-//		type AccountRepository struct {
-//			stdlib.AbstractRepository[*models.Account, uint]
-//		}
+// Generic Parameters:
+//   - T: The type representing the database entity, which must implement the `Identifiable[K]` interface.
+//   - K: The type of the entity's primary key (ID), constrained to supported ID types.
 //
-//		func NewAccountRepository(gormDB *gorm.DB) *AccountRepository {
-//		return &AccountRepository{
-//			AbstractRepository: stdlib.CreateRepository(gormDB, AccountRepository{}),
-//		}
+// Parameters:
+//   - gormDB (*gorm.DB): The GORM database instance used for entity persistence.
+//     This must not be nil, otherwise the function will panic.
+//   - self (AbstractRepository[T, K]): A reference to the specific repository implementation.
+//     This is used to allow method overrides or extensions by the concrete repository.
+//
+// Returns:
+//   - *abstractRepositoryImpl[T, K]: A pointer to the newly created repository instance.
+//
+// Panics:
+//   - If `gormDB` is nil, it panics with the message "[lib] gormDB is nil".
+//   - If `self` is nil, it panics with the message "[lib] self is nil".
+//
+// Example Usage:
+//
+//	// Define the concrete repository type.
+//	type AccountRepository struct {
+//		stdlib.AbstractRepository[*models.Account, uint]
 //	}
+//
+//	// Implement a constructor function for the repository.
+//	func NewAccountRepository(gormDB *gorm.DB) *AccountRepository {
+//		repo := &AccountRepository{} // Must be a pointer to reference the repository.
+//		repo.AbstractRepository = stdlib.CreateRepository(gormDB, repo)
+//		return repo
+//	}
+//
+// The `self` parameter ensures that methods defined in the concrete repository (`AccountRepository`)
+// are correctly referenced, enabling method overriding if needed.
 func CreateRepository[T Identifiable[K], K ID](gormDB *gorm.DB, self AbstractRepository[T, K]) *abstractRepositoryImpl[T, K] {
 	if gormDB == nil {
 		panic("[lib] gormDB is nil")
