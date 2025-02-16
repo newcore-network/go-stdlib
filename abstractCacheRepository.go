@@ -78,6 +78,7 @@ type abstractCacheRepositoryImpl[T any] struct {
 	client      *redis.Client
 	ctx         context.Context
 	isPrimitive bool
+	self        AbstractCacheRepository[T]
 }
 
 // Get implements AbstractCacheRepository.
@@ -302,7 +303,7 @@ func deserialize[T any](data []byte, isPrimitive bool) (T, error) {
 	return value, nil
 }
 
-func CreateCacheRepository[T any](redisClient *redis.Client, ctx context.Context) *abstractCacheRepositoryImpl[T] {
+func CreateCacheRepository[T any](redisClient *redis.Client, ctx context.Context, self AbstractCacheRepository[T]) *abstractCacheRepositoryImpl[T] {
 	if redisClient == nil {
 		panic("[lib] redisClient is nil")
 	}
@@ -313,6 +314,7 @@ func CreateCacheRepository[T any](redisClient *redis.Client, ctx context.Context
 		client:      redisClient,
 		ctx:         ctx,
 		isPrimitive: isPrimitiveType(new(T)),
+		self:        self,
 	}
 	return repo
 }
