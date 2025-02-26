@@ -45,8 +45,13 @@ type AbstractRepository[T Identifiable[K], K ID] interface {
 	Create(tx *gorm.DB, newEntity T) (T, error)
 
 	// Update modifies an existing entity of type T identified by its ID.
+	// If one of the parameter is null, it will be ignored! if you need to set a field to null, use UpdateSpecific instead
 	// The operation can optionally be executed within a transaction.
 	Update(tx *gorm.DB, id K, newEntity T) error
+
+	// UpdateSpecific modifies an existing entity of type T identified by its ID. It only updates the fields specified in the map
+	// The operation can optionally be executed within a transaction.
+	UpdateSpecific(tx *gorm.DB, id K, newEntity T, specificFields map[string]interface{}) error
 
 	// Delete marks an entity of type T as deleted (soft delete) by its ID.
 	// The operation can optionally be executed within a transaction.
@@ -174,6 +179,20 @@ func (repo *abstractRepositoryImpl[T, K]) Update(tx *gorm.DB, id K, newEntity T)
 		Model(entity).
 		Where("id = ?", id).
 		Updates(&newEntity).
+		Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *abstractRepositoryImpl[T, K]) UpdateSpecific(tx *gorm.DB, id K, newEntity T, specificFields map[string]interface{}) error {
+	entity := createInstance[T]()
+
+	if err := repo.transCheck(tx).
+		Model(entity).
+		Where("id = ?", id).
+		Updates(specificFields).
 		Error; err != nil {
 		return err
 	}
