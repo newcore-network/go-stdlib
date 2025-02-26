@@ -51,7 +51,7 @@ type AbstractRepository[T Identifiable[K], K ID] interface {
 
 	// UpdateSpecific modifies an existing entity of type T identified by its ID. It only updates the fields specified in the map
 	// The operation can optionally be executed within a transaction.
-	UpdateSpecific(tx *gorm.DB, id K, newEntity T, specificFields map[string]interface{}) error
+	UpdateSpecific(tx *gorm.DB, id K, specificFields map[string]interface{}) error
 
 	// Delete marks an entity of type T as deleted (soft delete) by its ID.
 	// The operation can optionally be executed within a transaction.
@@ -186,7 +186,7 @@ func (repo *abstractRepositoryImpl[T, K]) Update(tx *gorm.DB, id K, newEntity T)
 	return nil
 }
 
-func (repo *abstractRepositoryImpl[T, K]) UpdateSpecific(tx *gorm.DB, id K, newEntity T, specificFields map[string]interface{}) error {
+func (repo *abstractRepositoryImpl[T, K]) UpdateSpecific(tx *gorm.DB, id K, specificFields map[string]interface{}) error {
 	entity := createInstance[T]()
 
 	if err := repo.transCheck(tx).
